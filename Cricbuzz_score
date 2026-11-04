@@ -1,0 +1,17 @@
+from playwright.sync_api import sync_playwright
+
+SCORE = 'div.text-lg.font-bold:has-text("IND"):has-text("NZ")'
+
+with sync_playwright() as p:
+    try:
+        browser = p.chromium.launch(headless=False)
+    except Exception:
+        browser = p.chromium.launch(headless=False, channel="chrome")  # uses installed Chrome
+
+    page = browser.new_page()
+    page.goto("https://www.cricbuzz.com/live-cricket-scores/161245/nz-vs-ind-1st-odi-india-tour-of-new-zealand-2026", wait_until="domcontentloaded", timeout=60_000)
+
+    page.wait_for_selector(SCORE, timeout=30_000)
+    print(page.locator(SCORE).first.inner_text())
+    page.screenshot(path="score.png")
+    browser.close()
